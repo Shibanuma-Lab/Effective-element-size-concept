@@ -2644,7 +2644,7 @@ jobnumber = {jobnumber}'''
         Best_a_list.append(float(Best_a))
         Best_b_list.append(float(Best_b))
         print("\n")
-
+    print("----------------OVER----------------------------")
     return (
         sizes_list,
         Best_n_list,
@@ -2655,159 +2655,170 @@ jobnumber = {jobnumber}'''
     )
 
 def Effective_Element_Size_calculate(s0, si):
-    def tria_average(dam, pla, fs, size, tri, fracture_point, max_point, fracture_columns):
-        df1 = pd.read_excel(dam)
-        df2 = pd.read_excel(pla)
-        df3 = pd.read_excel(fs)
-        df4 = pd.read_excel(size)
-        df5 = pd.read_excel(tri)
-        df11 = df1[df1.iloc[:, 0] > max_point]
-        df22 = df2[df1.iloc[:, 0] > max_point]
-        df55 = df5[df1.iloc[:, 0] > max_point]
-
-        zero_row = pd.DataFrame(np.zeros((1, df5.shape[1])), columns=df5.columns)
-        df5 = pd.concat([zero_row, df5], ignore_index=True)
-        Damage_data = df1.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        Eqplas_data = df2.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        FSSSSS_data = df3.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        Sizeee_data = df4.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        TRIIII_data = df5.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-
-        Damage_data = Damage_data.mean(axis=1)
-        Eqplas_data = Eqplas_data.mean(axis=1)
-        FSSSSS_data = FSSSSS_data.mean(axis=1)
-        Sizeee_data = Sizeee_data.mean(axis=1)
-        TRIIII_data = TRIIII_data.mean(axis=1)
-
-        Damage = np.array(Damage_data)
-        FS = np.array(FSSSSS_data)
-        Size = np.array(Sizeee_data)
-        Eqplas = np.array(Eqplas_data)
-        TRI = np.array(TRIIII_data)
-        FS_safe = np.where((FS == 0) | np.isnan(FS), np.nan, FS)
-        TRI = np.nan_to_num(TRI, nan=0.0)
-        Leff_value = np.trapz(TRI, Damage) / (Damage[-1] - Damage[0])
-
-        Damage_data2 = df11.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        Eqplas_data2 = df22.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        TRIIII_data2 = df55.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
-        Damage_data2 = Damage_data2.mean(axis=1)
-        Eqplas_data2 = Eqplas_data2.mean(axis=1)
-        TRIIII_data2 = TRIIII_data2.mean(axis=1)
-        Damage2 = np.array(Damage_data2)
-        Eqplas2 = np.array(Eqplas_data2)
-        TRI2 = np.array(TRIIII_data2)
-        TRI2 = np.nan_to_num(TRI2, nan=0.0)
-        Leff_max = np.trapz(TRI2, Damage2) / (Damage2[-1] - Damage2[0])
-        print(Leff_max, Leff_value)
-
-        return Leff_max, Leff_value
-
-    def tria_average2(dam, pla, fs, size, tri, fracture_point, max_point, fracture_columns):
-        df1 = pd.read_excel(dam)
-        df2 = pd.read_excel(pla)
-        df3 = pd.read_excel(fs)
-        df4 = pd.read_excel(size)
-        df5 = pd.read_excel(tri)
-        df11 = df1[df1.iloc[:, 0] > max_point]
-        df22 = df2[df1.iloc[:, 0] > max_point]
-        df55 = df5[df5.iloc[:, 0] > max_point]
-
-        zero_row = pd.DataFrame(np.zeros((1, df5.shape[1])), columns=df5.columns)
-        df5 = pd.concat([zero_row, df5], ignore_index=True)
-        Damage_data = df1.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        Eqplas_data = df2.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        FSSSSS_data = df3.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        Sizeee_data = df4.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        TRIIII_data = df5.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-
-        Damage = np.array(Damage_data)
-        FS = np.array(FSSSSS_data)
-        Size = np.array(Sizeee_data)
-        Eqplas = np.array(Eqplas_data)
-        TRI = np.array(TRIIII_data)
-        TRI = np.nan_to_num(TRI, nan=0.0)
-
-        Damage_data2 = df11.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        Eqplas_data2 = df22.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        TRIIII_data2 = df55.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
-        Damage2 = np.array(Damage_data2)
-        Eqplas2 = np.array(Eqplas_data2)
-        TRI2 = np.array(TRIIII_data2)
-        TRI2 = np.nan_to_num(TRI2, nan=0.0)
-
-        Leff_maxs = []
-        Leff_values = []
-        for i in range(TRI.shape[1]):  # 遍历列
-            Leff1_values = np.trapz(TRI[:, i], Damage[:, i])  # 对每一列计算Leff1
-            Leff_values.append(Leff1_values / (Damage[-1, i] - Damage[0, i]))
-
-        for i in range(TRI2.shape[1]):  # 遍历列
-            MAX_values = np.trapz(TRI2[:, i], Damage2[:, i])  # 对每一列计算Leff1
-            Leff_maxs.append(MAX_values / (Damage2[-1, i] - Damage2[0, i]))
-
-        Leff_max = np.mean(Leff_maxs)
-        Leff_value = np.mean(Leff_values)
-        print(Leff_max, Leff_value)
-        return Leff_max, Leff_value
-
-    def calculate_average(file1, file2, file3, file4, fracture_point, fracture_columns):
-        df1 = pd.read_excel(file1)
-        df2 = pd.read_excel(file2)
-        df3 = pd.read_excel(file3)
-        df4 = pd.read_excel(file4)
-        Damage_data = df1.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
-        Eqplas_data = df2.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
-        FSSSSS_data = df3.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
-        Sizeee_data = df4.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
-
-        for idx, row in Sizeee_data.iterrows():
-            if np.all(row > 0):  # 如果该行所有列都大于 0
-                Leff0 = row.mean()  # 计算该行数据的平均值
-                break  # 找到后退出循环
-        print(Leff0)
-
-        Damage_data = Damage_data.mean(axis=1)
-        Eqplas_data = Eqplas_data.mean(axis=1)
-        FSSSSS_data = FSSSSS_data.mean(axis=1)
-        Sizeee_data = Sizeee_data.mean(axis=1)
-        Damage = np.array(Damage_data)
-        FS = np.array(FSSSSS_data)
-        Size = np.array(Sizeee_data)
-        Eqplas = np.array(Eqplas_data)
-        FS_safe = np.where((FS == 0) | np.isnan(FS), np.nan, FS)
-        SizeAA = Size / FS_safe
-        SizeAA = np.nan_to_num(SizeAA, nan=0.0)
-        Size = np.nan_to_num(Size, nan=0.0)
-        # SizeAA = np.where((FS == 0) | np.isnan(FS), 0, Size / FS)
-
-        # 不合适的处理方法
-        # for idx, value in enumerate(Sizeee_data):
-        #     if value > 0:
-        #         Leff1 = value
-        #         Leff1222=Leff1
-        #         Leff2 = idx
-        #         break
-        # if Leff2 is not None:
-        #     for i in range(Leff2 + 3, len(Sizeee_data)):  # 从第一个大于 0 的值的索引 + 3 开始
-        #         if Sizeee_data[i] > 0:
-        #             Leff0 = Sizeee_data[i]
-        #             break
-        # 错误的处理
-        # FS_safe = np.where((FS == 0) | np.isnan(FS), np.finfo(float).eps, FS)
-        # SizeAA = Size / FS_safe
-        # 不准确的方法
-        # Eqplas2=np.diff(Eqplas)
-        # SizeAAww=Eqplas2*SizeAA[:-1]
-        # SizeAAww2=np.sum(SizeAAww)
-        # Leff_value = SizeAAww2
-
-        Leff_ratio = np.trapz(Size, Damage) / Leff0
-        Leff_value_fs = np.trapz(SizeAA, Eqplas)
-        Leff_value = np.trapz(Size, Damage)
-
-        print(Leff_ratio, Leff_value, Leff0, Leff_value_fs)
-        return Leff_ratio, Leff_value, Leff0, Leff_value_fs
+    # def tria_average(dam, pla, fs, size, tri, fracture_point, max_point, fracture_columns):
+    #     df1 = pd.read_excel(dam)
+    #     df2 = pd.read_excel(pla)
+    #     df3 = pd.read_excel(fs)
+    #     df4 = pd.read_excel(size)
+    #     df5 = pd.read_excel(tri)
+    #     df11 = df1[df1.iloc[:, 0] > max_point]
+    #     df22 = df2[df1.iloc[:, 0] > max_point]
+    #     df55 = df5[df1.iloc[:, 0] > max_point]
+    #
+    #     zero_row = pd.DataFrame(np.zeros((1, df5.shape[1])), columns=df5.columns)
+    #     df5 = pd.concat([zero_row, df5], ignore_index=True)
+    #     Damage_data = df1.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     Eqplas_data = df2.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     FSSSSS_data = df3.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     Sizeee_data = df4.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     TRIIII_data = df5.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #
+    #     Damage_data = Damage_data.mean(axis=1)
+    #     Eqplas_data = Eqplas_data.mean(axis=1)
+    #     FSSSSS_data = FSSSSS_data.mean(axis=1)
+    #     Sizeee_data = Sizeee_data.mean(axis=1)
+    #     TRIIII_data = TRIIII_data.mean(axis=1)
+    #
+    #     Damage = np.array(Damage_data)
+    #     FS = np.array(FSSSSS_data)
+    #     Size = np.array(Sizeee_data)
+    #     Eqplas = np.array(Eqplas_data)
+    #     TRI = np.array(TRIIII_data)
+    #     FS_safe = np.where((FS == 0) | np.isnan(FS), np.nan, FS)
+    #     TRI = np.nan_to_num(TRI, nan=0.0)
+    #     Leff_value = np.trapz(TRI, Damage) / (Damage[-1] - Damage[0])
+    #
+    #     Damage_data2 = df11.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     Eqplas_data2 = df22.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     TRIIII_data2 = df55.iloc[1:8, fracture_columns]  # 1:8      :fracture_point+2
+    #     Damage_data2 = Damage_data2.mean(axis=1)
+    #     Eqplas_data2 = Eqplas_data2.mean(axis=1)
+    #     TRIIII_data2 = TRIIII_data2.mean(axis=1)
+    #     Damage2 = np.array(Damage_data2)
+    #     Eqplas2 = np.array(Eqplas_data2)
+    #     TRI2 = np.array(TRIIII_data2)
+    #     TRI2 = np.nan_to_num(TRI2, nan=0.0)
+    #     Leff_max = np.trapz(TRI2, Damage2) / (Damage2[-1] - Damage2[0])
+    #     print(Leff_max, Leff_value)
+    #
+    #     return Leff_max, Leff_value
+    #
+    # def tria_average2(dam, pla, fs, size, tri, fracture_point, max_point, fracture_columns):
+    #     df1 = pd.read_excel(dam)
+    #     df2 = pd.read_excel(pla)
+    #     df3 = pd.read_excel(fs)
+    #     df4 = pd.read_excel(size)
+    #     df5 = pd.read_excel(tri)
+    #     df11 = df1[df1.iloc[:, 0] > max_point]
+    #     df22 = df2[df1.iloc[:, 0] > max_point]
+    #     df55 = df5[df5.iloc[:, 0] > max_point]
+    #
+    #     zero_row = pd.DataFrame(np.zeros((1, df5.shape[1])), columns=df5.columns)
+    #     df5 = pd.concat([zero_row, df5], ignore_index=True)
+    #     Damage_data = df1.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     Eqplas_data = df2.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     FSSSSS_data = df3.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     Sizeee_data = df4.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     TRIIII_data = df5.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #
+    #     Damage = np.array(Damage_data)
+    #     FS = np.array(FSSSSS_data)
+    #     Size = np.array(Sizeee_data)
+    #     Eqplas = np.array(Eqplas_data)
+    #     TRI = np.array(TRIIII_data)
+    #     TRI = np.nan_to_num(TRI, nan=0.0)
+    #
+    #     Damage_data2 = df11.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     Eqplas_data2 = df22.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     TRIIII_data2 = df55.iloc[:fracture_point + 5, fracture_columns]  # 1:8      :fracture_point+2
+    #     Damage2 = np.array(Damage_data2)
+    #     Eqplas2 = np.array(Eqplas_data2)
+    #     TRI2 = np.array(TRIIII_data2)
+    #     TRI2 = np.nan_to_num(TRI2, nan=0.0)
+    #
+    #     Leff_maxs = []
+    #     Leff_values = []
+    #     for i in range(TRI.shape[1]):  # 遍历列
+    #         Leff1_values = np.trapz(TRI[:, i], Damage[:, i])  # 对每一列计算Leff1
+    #         Leff_values.append(Leff1_values / (Damage[-1, i] - Damage[0, i]))
+    #
+    #     for i in range(TRI2.shape[1]):  # 遍历列
+    #         MAX_values = np.trapz(TRI2[:, i], Damage2[:, i])  # 对每一列计算Leff1
+    #         Leff_maxs.append(MAX_values / (Damage2[-1, i] - Damage2[0, i]))
+    #
+    #     Leff_max = np.mean(Leff_maxs)
+    #     Leff_value = np.mean(Leff_values)
+    #     print(Leff_max, Leff_value)
+    #     return Leff_max, Leff_value
+    #
+    # def calculate_average(file1, file2, file3, file4, fracture_point, fracture_columns):
+    #     df1 = pd.read_excel(file1)
+    #     df2 = pd.read_excel(file2)
+    #     df3 = pd.read_excel(file3)
+    #     df4 = pd.read_excel(file4)
+    #     Damage_data = df1.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
+    #     Eqplas_data = df2.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
+    #     FSSSSS_data = df3.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
+    #     Sizeee_data = df4.iloc[:fracture_point + 5, 1:8]  # 1:8      :fracture_point+2
+    #
+    #     for idx, row in Sizeee_data.iterrows():
+    #         if np.all(row > 0):  # 如果该行所有列都大于 0
+    #             Leff0 = row.mean()  # 计算该行数据的平均值
+    #             break  # 找到后退出循环
+    #     print(Leff0)
+    #
+    #     Damage_data = Damage_data.mean(axis=1)
+    #     Eqplas_data = Eqplas_data.mean(axis=1)
+    #     FSSSSS_data = FSSSSS_data.mean(axis=1)
+    #     Sizeee_data = Sizeee_data.mean(axis=1)
+    #     Damage = np.array(Damage_data)
+    #     FS = np.array(FSSSSS_data)
+    #     Size = np.array(Sizeee_data)
+    #     Eqplas = np.array(Eqplas_data)
+    #     FS_safe = np.where((FS == 0) | np.isnan(FS), np.nan, FS)
+    #     SizeAA = Size / FS_safe
+    #     SizeAA = np.nan_to_num(SizeAA, nan=0.0)
+    #     Size = np.nan_to_num(Size, nan=0.0)
+    #     # SizeAA = np.where((FS == 0) | np.isnan(FS), 0, Size / FS)
+    #
+    #     # 不合适的处理方法
+    #     # for idx, value in enumerate(Sizeee_data):
+    #     #     if value > 0:
+    #     #         Leff1 = value
+    #     #         Leff1222=Leff1
+    #     #         Leff2 = idx
+    #     #         break
+    #     # if Leff2 is not None:
+    #     #     for i in range(Leff2 + 3, len(Sizeee_data)):  # 从第一个大于 0 的值的索引 + 3 开始
+    #     #         if Sizeee_data[i] > 0:
+    #     #             Leff0 = Sizeee_data[i]
+    #     #             break
+    #     # 错误的处理
+    #     # FS_safe = np.where((FS == 0) | np.isnan(FS), np.finfo(float).eps, FS)
+    #     # SizeAA = Size / FS_safe
+    #     # 不准确的方法
+    #     # Eqplas2=np.diff(Eqplas)
+    #     # SizeAAww=Eqplas2*SizeAA[:-1]
+    #     # SizeAAww2=np.sum(SizeAAww)
+    #     # Leff_value = SizeAAww2
+    #
+    #     Leff_ratio = np.trapz(Size, Damage) / Leff0
+    #     Leff_value_fs = np.trapz(SizeAA, Eqplas)
+    #     Leff_value = np.trapz(Size, Damage)
+    #
+    #     print(Leff_ratio, Leff_value, Leff0, Leff_value_fs)
+    #     return Leff_ratio, Leff_value, Leff0, Leff_value_fs
+    # def crack(file1, delete_time, fracture_columns):
+    #     df1 = pd.read_excel(file1)
+    #     INI_data = df1.iloc[:, fracture_columns]
+    #     # for idx, row in INI_data.iterrows():
+    #     #     if np.all(row > 0):  # 如果该行所有列都大于 0
+    #     #         INI_data0 = row.mean()  # 计算该行数据的平均值
+    #     #         break  # 找到后退出循环
+    #
+    #     INI_data = INI_data.mean(axis=1)
+    #     cra_dis = INI_data[10]
+    #     return cra_dis
 
     def calculate_average2(file1, file2, file3, file4, fracture_point, fracture_columns):
         df1 = pd.read_excel(file1)
@@ -2840,9 +2851,9 @@ def Effective_Element_Size_calculate(s0, si):
         Leff_values = []
         Leff0s = []
         Leff_value_fss = []
-        for i in range(Size.shape[1]):  # 遍历列
-            Leff1_values_fs = np.trapz(SizeAA[:, i], Eqplas[:, i])  # 对每一列计算Leff1
-            Leff1_values = np.trapz(Size[:, i], Damage[:, i])  # 对每一列计算Leff1
+        for i in range(Size.shape[1]):
+            Leff1_values_fs = np.trapz(SizeAA[:, i], Eqplas[:, i])
+            Leff1_values = np.trapz(Size[:, i], Damage[:, i])
             Leff_ratios.append(Leff1_values / Leff0[i])
             Leff_values.append(Leff1_values)
             Leff_value_fss.append(Leff1_values_fs)
@@ -2852,7 +2863,7 @@ def Effective_Element_Size_calculate(s0, si):
         Leff_value = np.mean(Leff_values)
         Leff0 = np.mean(Leff0s)
         Leff_value_fs = np.mean(Leff_value_fss)
-        print(Leff_ratio, Leff_value, Leff0, Leff_value_fs)
+        # print(Leff_ratio, Leff_value, Leff0, Leff_value_fs)
         return Leff_ratio, Leff_value, Leff0, Leff_value_fs
 
     def extract_unique_numbers(folder_path):
@@ -2862,18 +2873,6 @@ def Effective_Element_Size_calculate(s0, si):
             numbers = re.findall(r'-(\d+)', filename)
             unique_numbers.update(map(int, numbers))
         return unique_numbers
-
-    def crack(file1, delete_time, fracture_columns):
-        df1 = pd.read_excel(file1)
-        INI_data = df1.iloc[:, fracture_columns]
-        # for idx, row in INI_data.iterrows():
-        #     if np.all(row > 0):  # 如果该行所有列都大于 0
-        #         INI_data0 = row.mean()  # 计算该行数据的平均值
-        #         break  # 找到后退出循环
-
-        INI_data = INI_data.mean(axis=1)
-        cra_dis = INI_data[10]
-        return cra_dis
 
     def damage_time(file_path):
         df = pd.read_excel(file_path)
@@ -2896,8 +2895,8 @@ def Effective_Element_Size_calculate(s0, si):
         return Time, row_index, exceeding_columns
 
     def extract(si):
-        for Size in range(len(si)):
-            Size = si[Size]
+        for k in range(len(si)):
+            Size = si[k]
             subfolder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"Size{Size}")
             rptname = os.path.join(subfolder_path, f'abaqus.rpt')
             with open(rptname, 'r') as file:
@@ -2982,10 +2981,10 @@ def Effective_Element_Size_calculate(s0, si):
                     ws.cell(row=i + 2, column=1, value=first_value)
                     for j, value in enumerate(grouped_data[i], start=2):
                         ws.cell(row=i + 2, column=j, value=value)
-                subfolder = f"{si[Size]}"
+                subfolder = f"{si[k]}"
                 if not os.path.exists(subfolder):
                     os.makedirs(subfolder)
-                file_path = os.path.join(subfolder, f"{si[Size]}-{Type}-{E_number}.xlsx")
+                file_path = os.path.join(subfolder, f"{si[k]}-{Type}-{E_number}.xlsx")
                 workbook.save(file_path)
             print('Successfully extracted: Size =', Size)
         return
@@ -2993,8 +2992,8 @@ def Effective_Element_Size_calculate(s0, si):
     def average(si):
         all_stats = []
         effsize = []
-        for i in range(len(si)):
-            Size = si[i]
+        for k in range(len(si)):
+            Size = si[k]
             subfolder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{Size}")
             unique_numbers = extract_unique_numbers(subfolder_path)
             unique_numbers = sorted(set(map(int, unique_numbers)))
@@ -3028,7 +3027,6 @@ def Effective_Element_Size_calculate(s0, si):
                 #     writer.writerow(["element", "delete_time", "element_dis"])
                 #     writer.writerows(results)
                 # print(f"Results written to {output_file}")
-
                 try:
                     fracture_columns2 = fracture_columns
                     SIZE4_ratio, SIZE4_value, SIZE4_ave, SIZE4_value_ratio = calculate_average2(file1, file2, file3,
@@ -3066,7 +3064,7 @@ def Effective_Element_Size_calculate(s0, si):
             all_stats.append([Size] + list(mean_values2))
             effsize.append(mean_values2[1])
 
-        stats_output_file = "all_stats_size.csv"
+        stats_output_file = "all_effective_size.csv"
         with open(stats_output_file, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(
@@ -3132,31 +3130,6 @@ def Design_Arctan_R2(x_data, n_list, fs_list, atri_list, A_data, B_data):
     })
     df_out.to_csv('Designed_A_B.csv', index=False, float_format='%.6f')
     return params_A, params_B
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
